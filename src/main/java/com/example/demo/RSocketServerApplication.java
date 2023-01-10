@@ -6,7 +6,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 @Slf4j
 @SpringBootApplication
@@ -27,6 +30,17 @@ public class RSocketServerApplication {
 	Mono<Void> fireAndForget(final Message message) {
 		log.info("Received fire-and-forget request: {}", message);
 		return Mono.empty();
+	}
+
+	@MessageMapping("request-stream")
+	Flux<Message> stream(final Message message) {
+		log.info("Received stream request: {}", message);
+
+		return Flux
+				.interval(Duration.ofSeconds(1))
+				.map(index -> new Message("You said: " + message.getMessage() +". Response #" + index
+				))
+				.log();
 	}
 
 }
