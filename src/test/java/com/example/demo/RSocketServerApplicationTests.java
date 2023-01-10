@@ -84,4 +84,26 @@ class RSocketServerApplicationTests {
 			.verify();
 	}
 
+	@Test
+	void testStreamOftStream() {
+		// Send a request message
+		Flux<Message> response = requester
+				.route("stream-stream")
+				.data(Flux.just(2))
+				.retrieveFlux(Message.class);
+
+		// Verify that the response message contains the expected data
+		StepVerifier
+			.create(response)
+			.consumeNextWith(message -> {
+				assertThat(message.getMessage()).isEqualTo("Stream response #0");
+			})
+			.expectNextCount(0)
+			.consumeNextWith(message -> {
+				assertThat(message.getMessage()).isEqualTo("Stream response #1");
+			})
+			.thenCancel()
+			.verify();
+	}
+
 }
