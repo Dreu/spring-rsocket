@@ -18,7 +18,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-class DemoApplicationTests {
+class RSocketServerApplicationTests {
 
 	private static RSocketRequester requester;
 	@BeforeAll
@@ -38,11 +38,26 @@ class DemoApplicationTests {
 				.data(new Message(("TEST")))
 				.retrieveMono(Message.class);
 
+		// Verify that the response message contains the expected data
 		StepVerifier
 				.create(response)
 				.consumeNextWith(message -> {
 					assertThat(message.getMessage()).isEqualTo("You said: TEST");
 				})
+				.verifyComplete();
+	}
+
+	@Test
+	void testFireAndForger() {
+
+		Mono<Void> response = requester
+				.route("fire-and-forger")
+				.data(new Message(("TEST")))
+				.retrieveMono(Void.class);
+
+		// Assert That the result is a completed Mono
+		StepVerifier
+				.create(response)
 				.verifyComplete();
 	}
 
